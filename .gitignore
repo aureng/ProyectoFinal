@@ -1,0 +1,5 @@
+/Debug
+*.vcxproj.*
+*.vcxproj
+/Models
+/Textures

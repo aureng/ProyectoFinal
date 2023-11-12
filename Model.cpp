@@ -129,6 +129,7 @@ void Model::LoadMaterials(const aiScene * scene)
 				std::string png = "png";
 				std::size_t existetga = filename.find(tga);
 				std::size_t existepng= filename.find(png);
+				printf("%s",filename);
 				std::string texPath = std::string("Textures/") + filename;
 				TextureList[i] = new Texture(texPath.c_str());
 				if (existetga != std::string::npos || existepng != std::string::npos)

@@ -1,5 +1,4 @@
 /Debug
 *.vcxproj.*
 *.vcxproj
-/Models
-/Textures
+/x64

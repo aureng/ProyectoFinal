@@ -13,7 +13,10 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 {
 	width = windowWidth;
 	height = windowHeight;
-	muevex = 2.0f;
+	i_key = j_key = k_key = l_key = 0.0f;
+	paletaZ = paletaX = paletaC = 0.0f;
+	resorte = 0.0f;
+	coin_sfx = pidove_sfx = birdflap_sfx = bumper_sfx = spring1_sfx = spring2_sfx = flipper_sfx = false;
 	for (size_t i = 0; i < 1024; i++)
 	{
 		keys[i] = 0;
@@ -36,7 +39,9 @@ int Window::Initialise()
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
 	//CREAR VENTANA
-	mainWindow = glfwCreateWindow(width, height, "Proyecto Final: Pinball", NULL, NULL);
+	mainWindow = glfwCreateWindow(width, height, "Proyecto Final: Pinball", glfwGetPrimaryMonitor(), NULL);
+	glfwSetInputMode(mainWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 	if (!mainWindow)
 	{
@@ -78,6 +83,7 @@ void Window::createCallbacks()
 {
 	glfwSetKeyCallback(mainWindow, ManejaTeclado);
 	glfwSetCursorPosCallback(mainWindow, ManejaMouse);
+	glfwSetMouseButtonCallback(mainWindow, ManejaMouseButtons);
 }
 GLfloat Window::getXChange()
 {
@@ -104,15 +110,91 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-	if (key == GLFW_KEY_Y)
+
+
+
+	if (key == GLFW_KEY_I && action == GLFW_PRESS)
 	{
-		theWindow-> muevex += 1.0;
+		theWindow->i_key += 1.0f;
 	}
-	if (key == GLFW_KEY_U)
+	if (key == GLFW_KEY_J && action == GLFW_PRESS)
 	{
-		theWindow-> muevex -= 1.0;
+		theWindow->j_key += 1.0f;
+	}
+	if (key == GLFW_KEY_K && action == GLFW_PRESS)
+	{
+		theWindow->k_key += 1.0f;
+	}
+	if (key == GLFW_KEY_L && action == GLFW_PRESS)
+	{
+		theWindow->l_key += 1.0f;
+	}
+	if (key == GLFW_KEY_T && action == GLFW_PRESS)
+	{
+		theWindow->i_key -= 1.0f;
+	}
+	if (key == GLFW_KEY_F && action == GLFW_PRESS)
+	{
+		theWindow->j_key -= 1.0f;
+	}
+	if (key == GLFW_KEY_G && action == GLFW_PRESS)
+	{
+		theWindow->k_key -= 1.0f;
+	}
+	if (key == GLFW_KEY_H && action == GLFW_PRESS)
+	{
+		theWindow->l_key -= 1.0f;
 	}
 
+
+	if (key == GLFW_KEY_Z)
+	{
+		if (action == GLFW_PRESS)
+		{
+			theWindow->flipper_sfx = true;
+			do {
+				theWindow->paletaZ += 1.0f;
+			} while (theWindow->paletaZ <= 45.0f);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			do {
+				theWindow->paletaZ -= 1.0f;
+			} while (theWindow->paletaZ >= 0.0f);
+		}
+	}
+	if (key == GLFW_KEY_X)
+	{
+		if (action == GLFW_PRESS)
+		{
+			theWindow->flipper_sfx = true;
+			do {
+				theWindow->paletaX +=  1.0f;
+			} while (theWindow->paletaX <= 45.0f);
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			do {
+				theWindow->paletaX -= 1.0f;
+			} while (theWindow->paletaX >= 0.0f);
+		}
+	}
+	if (key == GLFW_KEY_C)
+	{
+		if (action == GLFW_PRESS) 
+		{
+			theWindow->flipper_sfx = true;
+			do {
+				theWindow->paletaC += 1.0f;
+			} while (theWindow->paletaC <= 45.0f);
+		}
+		else if(action == GLFW_RELEASE)
+		{
+			do {
+				theWindow->paletaC -= 1.0f;
+			} while (theWindow->paletaC >= 0.0f);
+		}	
+	}
 
 
 	if (key >= 0 && key < 1024)
@@ -120,18 +202,18 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		if (action == GLFW_PRESS)
 		{
 			theWindow->keys[key] = true;
-			//printf("se presiono la tecla %d'\n", key);
 		}
 		else if (action == GLFW_RELEASE)
 		{
 			theWindow->keys[key] = false;
-			//printf("se solto la tecla %d'\n", key);
 		}
 	}
+
 }
 
 void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 {
+
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
 	if (theWindow->mouseFirstMoved)
@@ -141,13 +223,46 @@ void Window::ManejaMouse(GLFWwindow* window, double xPos, double yPos)
 		theWindow->mouseFirstMoved = false;
 	}
 
-	theWindow->xChange = xPos - theWindow->lastX;
-	theWindow->yChange = theWindow->lastY - yPos;
+	// Calculate the offset from the center of the screen
+	double xOffset = xPos - theWindow->width / 2.0;
+	double yOffset = yPos - theWindow->height / 2.0;
 
-	theWindow->lastX = xPos;
-	theWindow->lastY = yPos;
+	// Set the mouse position to the center of the screen
+	glfwSetCursorPos(window, theWindow->width / 2.0, theWindow->height / 2.0);
+
+	// Update the lastX and lastY values
+	theWindow->lastX = theWindow->width / 2.0;
+	theWindow->lastY = theWindow->height / 2.0;
+
+	// Update the xChange and yChange values with the offset
+	theWindow->xChange = xOffset;
+	theWindow->yChange = -yOffset;
+
+
 }
 
+void Window::ManejaMouseButtons(GLFWwindow* window, int button, int action, int mods)
+{
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	// Maneja el clic del botón izquierdo
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			// Realiza la acción deseada para el clic izquierdo
+			theWindow->spring1_sfx = true;
+			theWindow->resorte += 1.0f;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			theWindow->spring2_sfx = true;
+			theWindow->resorte -= 1.0f;
+		}
+	}
+
+	// Puedes agregar más bloques condicionales para otros botones si es necesario
+}
 
 Window::~Window()
 {

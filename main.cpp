@@ -434,11 +434,12 @@ int main()
 		lastTime = now;
 
 		//Different timers for 1, 5 and 10 seconds
-		if (now - oneST >= 1.0f) { 
+		if (now - oneST >= 1.0f) {
 			//engine->play2D("audio/bumper.wav", false);
 			oneST = now;
 		}
 		if (now - fiveST >= 5.0f) {
+			engine->play2D("audio/pidove.wav", false);
 			//engine->play2D("audio/coin.wav", false);
 			fiveST = now;
 		}
@@ -462,7 +463,7 @@ int main()
 		uniformView = shaderList[0].GetViewLocation();
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformColor = shaderList[0].getColorLocation();
-		
+
 		//información en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
@@ -473,7 +474,7 @@ int main()
 
 		// luz ligada a la cámara de tipo flash
 		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
-			glm::vec3 lowerLight = camera.getCameraPosition();
+		glm::vec3 lowerLight = camera.getCameraPosition();
 		lowerLight.y -= 0.3f;
 		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
 
@@ -481,6 +482,7 @@ int main()
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);
+
 
 		// ################### ARMADO DEL ESCENARIO ########################
 
@@ -502,11 +504,11 @@ int main()
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		Pinball_M.RenderModel(); 
+		Pinball_M.RenderModel();
 
 		//######### Construcción de Pidove Jerarquico: ############
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(0.0f, 10.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-24.59f, 117.51f, 2.225f));
 		modelaux = model;
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PidoveBase_M.RenderModel();
@@ -516,7 +518,7 @@ int main()
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaZ()), glm::vec3(0.0f, 0.0f, -1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PidoveADC_M.RenderModel();
-
+		
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.556f, 0.557f, -2.897f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaX()), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -527,13 +529,13 @@ int main()
 		model = glm::translate(model, glm::vec3(-1.117f, 1.055f, -2.054));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaC()), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		PidoveAIA_M.RenderModel();
+		//PidoveAIA_M.RenderModel();
 
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(-1.072f, 1.055f, 2.055f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaC()), glm::vec3(-1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		PidoveADA_M.RenderModel();
+		//PidoveADA_M.RenderModel();
 		//##################
 
 		//############ EXTRAS Y SFX #################
@@ -551,7 +553,7 @@ int main()
 		Flipper_M.RenderModel(); //Flipper Izquierdo Superior controlado por Z
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(25.173f, 55.893f, 14.025f));
+		model = glm::translate(model, glm::vec3(24.908f, 54.961f, 5.612f));
 		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaX()), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));

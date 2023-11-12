@@ -317,7 +317,7 @@ int main()
 	CreateObjects();
 	CreateShaders();
 	ISoundEngine* engine = createIrrKlangDevice();
-	//engine->play2D("audio/theme.mp3", true);
+	engine->play2D("audio/theme.mp3", true);
 	camera = Camera(glm::vec3(50.0f, 80.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.5f);
 
 	// TEXTURAS PARA MIS COSAS
@@ -439,12 +439,12 @@ int main()
 			oneST = now;
 		}
 		if (now - fiveST >= 5.0f) {
-			engine->play2D("audio/pidove.wav", false);
+			//engine->play2D("audio/pidove.wav", false);
 			//engine->play2D("audio/coin.wav", false);
 			fiveST = now;
 		}
 		if (now - tenST >= 10.0f) {
-			//engine->play2D("audio/pidove.wav", false);
+			engine->play2D("audio/pidove.wav", false);
 			tenST = now;
 		}
 
@@ -547,7 +547,26 @@ int main()
 		Resorte_M.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(-5.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(-3.657f, 62.38f, 2.595f));
+		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Bumper_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-7.529f, 63.357f, -3.465f));
+		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Bumper_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-1.337f, 61.769f, -4.566f));
+		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Bumper_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-4.58f, 62.557f, 9.688f));
+		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaZ()), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Flipper_M.RenderModel(); //Flipper Izquierdo Superior controlado por Z
@@ -560,7 +579,7 @@ int main()
 		Flipper_M.RenderModel(); //Flipper Izquierdo Normal controlado por X
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(25.243f, 54.857f, -3.084f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaC()), glm::vec3(0.0f, -1.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));

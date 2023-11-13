@@ -2,3 +2,6 @@
 *.vcxproj.*
 *.vcxproj
 /x64
+/Release
+/Documentacion/*.docx
+/Documentacion/*.tmp

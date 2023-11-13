@@ -2,3 +2,4 @@
 *.vcxproj.*
 *.vcxproj
 /x64
+/Release

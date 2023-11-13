@@ -42,7 +42,13 @@ Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
 std::vector<Skybox> skyboxList;
-int skyboxI = 0;
+std::vector<Camera> cameralist;
+std::vector<Material> materialList;
+std::vector<PointLight> pointlightList;
+std::vector<SpotLight> spotlightList;
+
+int skyboxI = 0, cameraI = 0, materialI = 0, pointlightI = 0, spotlight = 0;
+
 std::string keyFrametxt = "keyFrames.txt";
 std::ofstream archivo(keyFrametxt, std::ios::app);
 
@@ -84,6 +90,8 @@ GLfloat lastTime = 0.0f;
 GLfloat oneST =0.0f, fiveST = 0.0f, tenST = 0.0f;
 float lastFrame = 0.0f;
 static double limitFPS = 1.0 / 60.0;
+
+//Dobles valores para cada textura que se quiera se pueda mover con offset: float->el offset, int->cuantas partes hay
 float toffsetScoreboardU = 0.0f, toffsetScoreboardV = 0.0f;
 int toffsetcountu = 0, toffsetcountv = 0;
 
@@ -105,7 +113,7 @@ void inputKeyframes(bool* keys);
 //función de calculo de normales por promedio de vértices 
 void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat* vertices, unsigned int verticeCount,
 	unsigned int vLength, unsigned int normalOffset)
-{
+{	
 	for (size_t i = 0; i < indiceCount; i += 3)
 	{
 		unsigned int in0 = indices[i] * vLength;
@@ -201,7 +209,6 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
-
 ///////////////////////////////KEYFRAMES/////////////////////
 bool animacion = false;
 
@@ -235,7 +242,6 @@ void saveFrame(void) //tecla L
 {
 
 	printf("frameindex %d\n", FrameIndex);
-
 
 	KeyFrame[FrameIndex].movAvion_x = movAvion_x;
 	KeyFrame[FrameIndex].movAvion_y = movAvion_y;
@@ -364,9 +370,9 @@ int main()
 	skyboxFacesDia.push_back("Textures/Skybox/dia/top.png"); //Up
 	skyboxFacesDia.push_back("Textures/Skybox/dia/back.png"); //Back
 	skyboxFacesDia.push_back("Textures/Skybox/dia/front.png"); //Front
-
 	skyboxDia = Skybox(skyboxFacesDia);
 	skyboxList.push_back(skyboxDia);
+
 	std::vector<std::string> skyboxFacesTarde;
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/left.png"); //Left
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/right.png"); //Right
@@ -374,7 +380,6 @@ int main()
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/top.png"); //Up
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/back.png"); //Back
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/front.png"); //Front
-
 	skyboxTarde = Skybox(skyboxFacesTarde);
 	skyboxList.push_back(skyboxTarde);
 
@@ -387,6 +392,7 @@ int main()
 	skyboxFacesNoche.push_back("Textures/Skybox/noche/front.png"); //Front
 	skyboxNoche = Skybox(skyboxFacesNoche);
 	skyboxList.push_back(skyboxNoche);
+
 
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 4);
@@ -459,7 +465,7 @@ int main()
 			//######################
 			oneST = now;
 		}
-			
+		
 		if (now - fiveST >= 5.0f) {
 			//engine->play2D("audio/pidove.wav", false);
 			//engine->play2D("audio/coin.wav", false);
@@ -499,7 +505,7 @@ int main()
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
-
+		
 		// luz ligada a la cámara de tipo flash
 		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
 		glm::vec3 lowerLight = camera.getCameraPosition();
@@ -510,7 +516,6 @@ int main()
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);
-
 
 		// ################### ARMADO DEL ESCENARIO ########################
 

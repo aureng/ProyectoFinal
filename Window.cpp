@@ -16,6 +16,7 @@ Window::Window(GLint windowWidth, GLint windowHeight)
 	i_key = j_key = k_key = l_key = 0.0f;
 	paletaZ = paletaX = paletaC = 0.0f;
 	resorte = 0.0f;
+	moneda_anim = pidove_anim = false;
 	coin_sfx = pidove_sfx = birdflap_sfx = bumper_sfx = spring1_sfx = spring2_sfx = flipper_sfx = false;
 	for (size_t i = 0; i < 1024; i++)
 	{
@@ -111,8 +112,49 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
+	//Numeros declarados para uso de animaciones?
+	if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+	{
+		//printf("Presione 1\n");
+	}
+	if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+	{
+		//printf("Presione 2\n");
+	}
+	if (key == GLFW_KEY_3 && action == GLFW_PRESS)
+	{
+		//printf("Presione 3\n");
+	}
+	if (key == GLFW_KEY_4 && action == GLFW_PRESS)
+	{
+		//printf("Presione 4\n");
+	}
+	if (key == GLFW_KEY_5 && action == GLFW_PRESS)
+	{
+		//printf("Presione 5\n");
+	}
+	if (key == GLFW_KEY_6 && action == GLFW_PRESS)
+	{
+		//printf("Presione 6\n");
+	}
+	if (key == GLFW_KEY_7 && action == GLFW_PRESS)
+	{
+		//printf("Presione 7\n");
+	}
+	if (key == GLFW_KEY_8 && action == GLFW_PRESS)
+	{
+		//printf("Presione 8\n");
+	}
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+	{
+		//printf("Presione 9\n");
+	}
+	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
+	{
+		//printf("Presione 0\n");
+	}
 
-
+	//Controles TFGH y IJKL para keyframes?
 	if (key == GLFW_KEY_I && action == GLFW_PRESS)
 	{
 		theWindow->i_key += 1.0f;

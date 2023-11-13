@@ -26,6 +26,10 @@ public:
 	GLfloat getPaletaX() { return paletaX; }
 	GLfloat getPaletaC() { return paletaC; }
 	GLfloat getResorte() { return resorte; }
+
+	GLboolean getMoneda_anim() { return moneda_anim; }
+	GLboolean getPidove_anim() { return pidove_anim; }
+
 	GLboolean getFlipper_sfx() { return flipper_sfx; }
 	GLboolean getSpring1_sfx() { return spring1_sfx; }
 	GLboolean getSpring2_sfx() { return spring2_sfx; }
@@ -33,6 +37,10 @@ public:
 	GLboolean getCoin_sfx() { return coin_sfx; }
 	GLboolean getPidove_sfx() { return pidove_sfx; }
 	GLboolean getBirdFlap_sfx() { return birdflap_sfx; }
+
+	void setMoneda_anim() { moneda_anim = false; }
+	void setPidove_anim() { pidove_anim = false; }
+
 	void setCoin_sfx() { coin_sfx = false; }
 	void setPidove_sfx() { pidove_sfx = false; }
 	void setBirdFlap_sfx() { birdflap_sfx = false; }
@@ -55,6 +63,7 @@ private:
 	bool mouseFirstMoved;
 	GLfloat paletaZ, paletaX, paletaC;
 	GLfloat resorte;
+	GLboolean moneda_anim, pidove_anim;
 	GLboolean flipper_sfx,spring1_sfx,spring2_sfx, bumper_sfx, coin_sfx, pidove_sfx, birdflap_sfx;
 	static void ManejaTeclado(GLFWwindow* window, int key, int code, int action, int mode);
 	static void ManejaMouse(GLFWwindow* window, double xPos, double yPos);

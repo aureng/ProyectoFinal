@@ -54,6 +54,7 @@ Texture dirtTexture;
 Texture brickTexture;
 Texture pisoTexture;
 Texture glassTexture;
+Texture scoreboardTexture;
 
 //LISTA DE MODELOS
 Model Pinball_M;
@@ -78,12 +79,13 @@ Skybox skyboxDia, skyboxTarde, skyboxNoche;
 Material Material_brillante;
 Material Material_opaco;
 
-//Sphere cabeza = Sphere(0.5, 20, 20);
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 GLfloat oneST =0.0f, fiveST = 0.0f, tenST = 0.0f;
 float lastFrame = 0.0f;
 static double limitFPS = 1.0 / 60.0;
+float toffsetScoreboardU = 0.0f, toffsetScoreboardV = 0.0f;
+int toffsetcountu = 0, toffsetcountv = 0;
 
 // luz direccional
 DirectionalLight mainLight;
@@ -133,18 +135,16 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 void CreateObjects()
 {
 	unsigned int indices[] = {
-		0, 3, 1,
-		1, 3, 2,
-		2, 3, 0,
-		0, 1, 2
+		0, 2, 1,
+		0, 3, 2
 	};
 
 	GLfloat vertices[] = {
 		//	x      y      z			u	  v			nx	  ny    nz
-			-1.0f, -1.0f, -0.6f,	0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-			0.0f, -1.0f, 1.0f,		0.5f, 0.0f,		0.0f, 0.0f, 0.0f,
-			1.0f, -1.0f, -0.6f,		1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f
+		0.0f, -0.5f, -0.5f,		0.0f, 0.875f,		1.0f, 0.0f, 0.0f, //0 izq inf
+		0.0f, 0.5f, -0.5f,		0.0,  1.0f,			1.0f, 0.0f, 0.0f, //1 izq sup
+		0.0f, 0.5f, 0.5f,		0.333f, 1.0f,			1.0f, 0.0f, 0.0f, //2 der sup
+		0.0f, -0.5f, 0.5f,		0.333f, 0.875f,		1.0f, 0.0f, 0.0f  //3 der inf
 	};
 
 	unsigned int floorIndices[] = {
@@ -172,7 +172,7 @@ void CreateObjects()
 	};
 	
 	Mesh *obj1 = new Mesh();
-	obj1->CreateMesh(vertices, indices, 32, 12);
+	obj1->CreateMesh(vertices, indices, 32, 6);
 	meshList.push_back(obj1);
 
 	Mesh *obj2 = new Mesh();
@@ -187,7 +187,7 @@ void CreateObjects()
 	obj4->CreateMesh(glassVertices, glassIndices, 32, 6);
 	meshList.push_back(obj4);
 
-	calcAverageNormals(indices, 12, vertices, 32, 8, 5);
+	//calcAverageNormals(indices, 12, vertices, 32, 8, 5);
 
 	calcAverageNormals(glassIndices, 6, glassVertices, 32, 8, 5);
 
@@ -201,12 +201,9 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
+
 ///////////////////////////////KEYFRAMES/////////////////////
-
-
 bool animacion = false;
-
-
 
 //NEW// Keyframes
 float posXavion = 2.0, posYavion = 5.0, posZavion = -3.0;
@@ -327,6 +324,8 @@ int main()
 	pisoTexture.LoadTexture();
 	glassTexture = Texture("Textures/glass.png");
 	glassTexture.LoadTextureA();
+	scoreboardTexture = Texture("Textures/scoreboard.jpg");
+	scoreboardTexture.LoadTexture();
 
 	Pinball_M = Model();
 	Pinball_M.LoadModel("Models/pinball.obj");
@@ -429,7 +428,7 @@ int main()
 	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
-		uniformSpecularIntensity = 0, uniformShininess = 0;
+		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset = 0;
 	GLuint uniformColor = 0;
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
 	////Loop mientras no se cierra la ventana
@@ -442,9 +441,25 @@ int main()
 
 		//Different timers for 1, 5 and 10 seconds
 		if (now - oneST >= 1.0f) {
-			//engine->play2D("audio/bumper.wav", false);
+			//######## LOGICA DE CAMBIO DE TEXTURAS DE SCOREBOARD #######
+			toffsetScoreboardV -= 0.124f;
+			toffsetcountv += 1;
+			if (toffsetcountv == 8) {//Termina de recorrer las filas
+				toffsetcountu += 1; // contador para u
+				toffsetcountv = 0; // resetea contador de v
+				toffsetScoreboardV = 0.0f; //Empieza el offset desde arriba
+				toffsetScoreboardU += 0.333f; // siguiente columna
+			}
+			if (toffsetcountu == 3) { //Si se pasa de las columnas de la textura
+				toffsetcountu = 0; //resetea contador 
+				toffsetcountv = 0;
+				toffsetScoreboardU = 0.0;
+				toffsetScoreboardV = 0.0;
+			}
+			//######################
 			oneST = now;
 		}
+			
 		if (now - fiveST >= 5.0f) {
 			//engine->play2D("audio/pidove.wav", false);
 			//engine->play2D("audio/coin.wav", false);
@@ -475,6 +490,7 @@ int main()
 		uniformView = shaderList[0].GetViewLocation();
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformColor = shaderList[0].getColorLocation();
+		uniformTextureOffset = shaderList[0].getOffsetLocation();
 
 		//información en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
@@ -501,6 +517,9 @@ int main()
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
+		glm::vec2 noOffset = glm::vec2(0.0f, 0.0f);
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
@@ -620,6 +639,18 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PBB_M.RenderModel();
 
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-22.315f, 76.122f, 0.0f));
+		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(8.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(1.0f, 5.593f, 19.242f)); 
+		toffset = glm::vec2(toffsetScoreboardU, toffsetScoreboardV);
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		scoreboardTexture.UseTexture();
+		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
+		meshList[0]->RenderMesh();
+
 		if (mainWindow.getFlipper_sfx()) {
 			engine->play2D("audio/flipper.wav", false);
 			mainWindow.setFlipper_sfx();
@@ -657,6 +688,7 @@ int main()
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(58.0f, 30.0f, 1.0f));
+		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(noOffset));
 		glassTexture.UseTexture();
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		

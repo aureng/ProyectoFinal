@@ -41,7 +41,8 @@ const float toRadians = 3.14159265f / 180.0f;
 Window mainWindow;
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
-
+std::vector<Skybox> skyboxList;
+int skyboxI = 0;
 std::string keyFrametxt = "keyFrames.txt";
 std::ofstream archivo(keyFrametxt, std::ios::app);
 
@@ -61,6 +62,8 @@ Model Bumper_M;
 Model Resorte_M;
 Model Moneda_M;
 Model Bola_M;
+Model PBT_M; //Pokeball Top
+Model PBB_M; //Pokeball Bottom
 
 //Exports para PIDOVE
 Model PidoveBase_M;
@@ -68,7 +71,6 @@ Model PidoveAIC_M;
 Model PidoveADC_M;
 Model PidoveAIA_M;
 Model PidoveADA_M;
-
 
 Skybox skyboxDia, skyboxTarde, skyboxNoche;
 
@@ -338,6 +340,10 @@ int main()
 	Moneda_M.LoadModel("Models/moneda.obj");
 	Bola_M = Model();
 	Bola_M.LoadModel("Models/bola.obj");
+	PBT_M = Model();
+	PBT_M.LoadModel("Models/Pokebola/poke_arriba.obj");
+	PBB_M = Model();
+	PBB_M.LoadModel("Models/Pokebola/poke_abajo.obj");
 
 	//Modelo de Pidove
 	PidoveBase_M = Model();
@@ -361,7 +367,7 @@ int main()
 	skyboxFacesDia.push_back("Textures/Skybox/dia/front.png"); //Front
 
 	skyboxDia = Skybox(skyboxFacesDia);
-
+	skyboxList.push_back(skyboxDia);
 	std::vector<std::string> skyboxFacesTarde;
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/left.png"); //Left
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/right.png"); //Right
@@ -371,6 +377,7 @@ int main()
 	skyboxFacesTarde.push_back("Textures/Skybox/tarde/front.png"); //Front
 
 	skyboxTarde = Skybox(skyboxFacesTarde);
+	skyboxList.push_back(skyboxTarde);
 
 	std::vector<std::string> skyboxFacesNoche;
 	skyboxFacesNoche.push_back("Textures/Skybox/noche/left.png"); //Left
@@ -380,7 +387,7 @@ int main()
 	skyboxFacesNoche.push_back("Textures/Skybox/noche/back.png"); //Back
 	skyboxFacesNoche.push_back("Textures/Skybox/noche/front.png"); //Front
 	skyboxNoche = Skybox(skyboxFacesNoche);
-
+	skyboxList.push_back(skyboxNoche);
 
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 4);
@@ -444,6 +451,10 @@ int main()
 			fiveST = now;
 		}
 		if (now - tenST >= 10.0f) {
+			skyboxI++;
+			if (skyboxI == 3) {
+				skyboxI = 0;
+			}
 			engine->play2D("audio/pidove.wav", false);
 			tenST = now;
 		}
@@ -456,7 +467,8 @@ int main()
 		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
+		skyboxList[skyboxI].DrawSkybox(camera.calculateViewMatrix(), projection);
+		//skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -596,6 +608,17 @@ int main()
 		model = glm::translate(model, glm::vec3(mainWindow.getI(),mainWindow.getJ(),mainWindow.getK()));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bola_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-14.625f, 65.811, 5.328));
+		model = glm::rotate(model, glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PBT_M.RenderModel();
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-14.625f, 65.811, 5.328));
+		model = glm::rotate(model, glm::radians(120.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		PBB_M.RenderModel();
 
 		if (mainWindow.getFlipper_sfx()) {
 			engine->play2D("audio/flipper.wav", false);

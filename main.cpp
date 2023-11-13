@@ -1,24 +1,17 @@
 //para cargar imagen
 #define STB_IMAGE_IMPLEMENTATION
 
+//
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
 #include <vector>
 #include <math.h>
-
 #include <glew.h>
 #include <glfw3.h>
-
 #include <glm.hpp>
 #include <gtc\matrix_transform.hpp>
 #include <gtc\type_ptr.hpp>
-//para probar el importer
-//#include<assimp/Importer.hpp>
-
-#include "irrKlang.h"
-using namespace irrklang;
-
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader_light.h"
@@ -29,13 +22,15 @@ using namespace irrklang;
 #include "Skybox.h"
 #include <iostream>
 #include <fstream>
-
-//para iluminación
 #include "CommonValues.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Material.h"
+#include "irrKlang.h"
+using namespace irrklang;
+
+//para iluminación
 const float toRadians = 3.14159265f / 180.0f;
 
 Window mainWindow;
@@ -63,12 +58,12 @@ Texture glassTexture;
 Texture scoreboardTexture;
 
 //LISTA DE MODELOS
-Model Pinball_M;
+Model Pinball_M; //Base de la estructura
 Model Flipper_M;
 Model Bumper_M;
 Model Resorte_M;
 Model Moneda_M;
-Model Bola_M;
+Model Bola_M; //Bola de Pinball
 Model PBT_M; //Pokeball Top
 Model PBB_M; //Pokeball Bottom
 
@@ -81,9 +76,14 @@ Model PidoveADA_M;
 
 Skybox skyboxDia, skyboxTarde, skyboxNoche;
 
-//materiales
+//MATERIALES
 Material Material_brillante;
 Material Material_opaco;
+
+//LUCES
+DirectionalLight mainLight;
+PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -91,20 +91,45 @@ GLfloat oneST =0.0f, fiveST = 0.0f, tenST = 0.0f;
 float lastFrame = 0.0f;
 static double limitFPS = 1.0 / 60.0;
 
+
+//############ VARIABLES PARA USO DE KEYFRAMES ####################
+typedef struct _frame
+{
+	//Variables para GUARDAR Key Frames
+	float movAvion_x;		//Variable para PosicionX
+	float movAvion_y;		//Variable para PosicionY
+	float movAvion_z;		//Variable para PosicionZ
+	float movAvion_xInc;		//Variable para IncrementoX
+	float movAvion_yInc;		//Variable para IncrementoY
+	float movAvion_zInc;		//Variable para IncrementoZ
+	float giroAvion;
+	float giroAvionInc;
+}FRAME;
+
+bool animacion = false;
+
+float posXavion = 2.0, posYavion = 5.0, posZavion = -3.0;
+float movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0f;
+float giroAvion = 0;
+#define MAX_FRAMES 100 //100
+int i_max_steps = 90; //90
+int i_curr_steps = 6;
+
+FRAME KeyFrame[MAX_FRAMES];
+int FrameIndex = 6;			//introducir datos
+bool play = false;
+int playIndex = 0;
+//#####################
+
+
+//VARIABLES PARA USO DE TEXTURE-OFFSET 
 //Dobles valores para cada textura que se quiera se pueda mover con offset: float->el offset, int->cuantas partes hay
 float toffsetScoreboardU = 0.0f, toffsetScoreboardV = 0.0f;
 int toffsetcountu = 0, toffsetcountv = 0;
 
-// luz direccional
-DirectionalLight mainLight;
-//para declarar varias luces de tipo pointlight
-PointLight pointLights[MAX_POINT_LIGHTS];
-SpotLight spotLights[MAX_SPOT_LIGHTS];
 
-// Vertex Shader
+//SHADERS
 static const char* vShader = "shaders/shader_light.vert";
-
-// Fragment Shader
 static const char* fShader = "shaders/shader_light.frag";
 
 // Para los keyframes (De preferencia se va si los puedo implementar en window.cpp)
@@ -138,7 +163,6 @@ void calcAverageNormals(unsigned int* indices, unsigned int indiceCount, GLfloat
 		vertices[nOffset] = vec.x; vertices[nOffset + 1] = vec.y; vertices[nOffset + 2] = vec.z;
 	}
 }
-
 
 void CreateObjects()
 {
@@ -209,35 +233,7 @@ void CreateShaders()
 	shaderList.push_back(*shader1);
 }
 
-///////////////////////////////KEYFRAMES/////////////////////
-bool animacion = false;
-
-//NEW// Keyframes
-float posXavion = 2.0, posYavion = 5.0, posZavion = -3.0;
-float movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0f;
-float giroAvion = 0;
-
-#define MAX_FRAMES 100 //100
-int i_max_steps = 90; //90
-int i_curr_steps = 6;
-typedef struct _frame
-{
-	//Variables para GUARDAR Key Frames
-	float movAvion_x;		//Variable para PosicionX
-	float movAvion_y;		//Variable para PosicionY
-	float movAvion_z;
-	float movAvion_xInc;		//Variable para IncrementoX
-	float movAvion_yInc;		//Variable para IncrementoY
-	float movAvion_zInc;
-	float giroAvion;
-	float giroAvionInc;
-}FRAME;
-
-FRAME KeyFrame[MAX_FRAMES];
-int FrameIndex = 6;			//introducir datos
-bool play = false;
-int playIndex = 0;
-
+// ################## FUNCIONES DE KEYFRAMES ######################
 void saveFrame(void) //tecla L
 {
 
@@ -323,7 +319,6 @@ int main()
 	CreateShaders();
 	ISoundEngine* engine = createIrrKlangDevice();
 	engine->play2D("audio/theme.mp3", true);
-	camera = Camera(glm::vec3(50.0f, 80.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.5f);
 
 	// TEXTURAS PARA MIS COSAS
 	pisoTexture = Texture("Textures/piso.jpg");
@@ -333,6 +328,7 @@ int main()
 	scoreboardTexture = Texture("Textures/scoreboard.jpg");
 	scoreboardTexture.LoadTexture();
 
+	// Carga de Modelos
 	Pinball_M = Model();
 	Pinball_M.LoadModel("Models/pinball.obj");
 	Flipper_M = Model();
@@ -398,14 +394,11 @@ int main()
 	Material_opaco = Material(0.3f, 4);
 
 
-	//luz direccional, sólo 1 y siempre debe de existir
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.6f, 0.6f,
 		1.0f, 0.0f, -1.0f);
 
-	//contador de luces puntuales
 	unsigned int pointLightCount = 0;
-	//Declaración de primer luz puntual
 	pointLights[0] = PointLight(1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f,
 		-6.0f, 1.5f, 1.5f,
@@ -413,7 +406,6 @@ int main()
 	pointLightCount++;
 
 	unsigned int spotLightCount = 0;
-	//linterna
 	spotLights[0] = SpotLight(1.0f, 1.0f, 1.0f,
 		0.0f, 2.0f,
 		0.0f, 0.0f, 0.0f,
@@ -421,8 +413,6 @@ int main()
 		1.0f, 0.0f, 0.0f,
 		5.0f);
 	spotLightCount++;
-
-	//luz fija
 	spotLights[1] = SpotLight(0.0f, 1.0f, 0.0f,
 		1.0f, 2.0f,
 		5.0f, 10.0f, 0.0f,
@@ -430,21 +420,22 @@ int main()
 		1.0f, 0.0f, 0.0f,
 		15.0f);
 	spotLightCount++;
-	
-	//se crean mas luces puntuales y spotlight 
 
 	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformEyePosition = 0,
-		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset = 0;
-	GLuint uniformColor = 0;
+		uniformSpecularIntensity = 0, uniformShininess = 0, uniformTextureOffset = 0, uniformColor = 0;
+
+	// Creacion de camaras y vistas de projeccion
+	camera = Camera(glm::vec3(50.0f, 80.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.0f, 0.5f);
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 1000.0f);
-	////Loop mientras no se cierra la ventana
+	
+	// Loop mientras no se cierra la ventana
 	while (!mainWindow.getShouldClose())
 	{
 		GLfloat now = glfwGetTime();
 		deltaTime = now - lastTime;
 		deltaTime += (now - lastTime) / limitFPS;
 		lastTime = now;
-
+		
 		//Different timers for 1, 5 and 10 seconds
 		if (now - oneST >= 1.0f) {
 			//######## LOGICA DE CAMBIO DE TEXTURAS DE SCOREBOARD #######
@@ -465,7 +456,7 @@ int main()
 			//######################
 			oneST = now;
 		}
-		
+
 		if (now - fiveST >= 5.0f) {
 			//engine->play2D("audio/pidove.wav", false);
 			//engine->play2D("audio/coin.wav", false);
@@ -480,16 +471,15 @@ int main()
 			tenST = now;
 		}
 
+		//############ VARIABLES QUE PUEDEN CAMBIAR DEPENDIENDO LA LISTA ####################
 		//Recibir eventos del usuario
 		glfwPollEvents();
 		camera.keyControl(mainWindow.getsKeys(), deltaTime);
-		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
-
-		// Clear the window
+		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());		// Clear the window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		skyboxList[skyboxI].DrawSkybox(camera.calculateViewMatrix(), projection);
-		//skyboxDia.DrawSkybox(camera.calculateViewMatrix(), projection);
+		// ########## ESTO NO TENDRA CAMBIOS RELEVANTES EN TIEMPO DE EJECUCION ################
 		shaderList[0].UseShader();
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
@@ -497,40 +487,41 @@ int main()
 		uniformEyePosition = shaderList[0].GetEyePositionLocation();
 		uniformColor = shaderList[0].getColorLocation();
 		uniformTextureOffset = shaderList[0].getOffsetLocation();
-
-		//información en el shader de intensidad especular y brillo
+		//	información en el shader de intensidad especular y brillo
 		uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
 		uniformShininess = shaderList[0].GetShininessLocation();
 
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 		glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
-		
-		// luz ligada a la cámara de tipo flash
-		//sirve para que en tiempo de ejecución (dentro del while) se cambien propiedades de la luz
+
+		// FLASH EN TIEMPO DE EJECUCION
 		glm::vec3 lowerLight = camera.getCameraPosition();
 		lowerLight.y -= 0.3f;
 		spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
-
 		//información al shader de fuentes de iluminación
 		shaderList[0].SetDirectionalLight(&mainLight);
 		shaderList[0].SetPointLights(pointLights, pointLightCount);
 		shaderList[0].SetSpotLights(spotLights, spotLightCount);
+		//###################################
 
-		// ################### ARMADO DEL ESCENARIO ########################
 
+		//Inicializacion de apoyo
 		glm::mat4 model(1.0);
 		glm::mat4 modelaux(1.0);
 		glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 		glm::vec2 toffset = glm::vec2(0.0f, 0.0f);
 		glm::vec2 noOffset = glm::vec2(0.0f, 0.0f);
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
+		// ##################################################
 
+
+		// ################### ARMADO DEL ESCENARIO ########################
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(30.0f, 1.0f, 30.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
 		pisoTexture.UseTexture();
 		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
@@ -542,7 +533,7 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Pinball_M.RenderModel();
 
-		//######### Construcción de Pidove Jerarquico: ############
+		//############## INICIO DE PIDOVE JERARQUICO #################
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-24.59f, 117.51f, 2.225f));
 		modelaux = model;
@@ -554,7 +545,7 @@ int main()
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaZ()), glm::vec3(0.0f, 0.0f, -1.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		PidoveADC_M.RenderModel();
-		
+
 		model = modelaux;
 		model = glm::translate(model, glm::vec3(1.556f, 0.557f, -2.897f));
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaX()), glm::vec3(0.0f, 0.0f, -1.0f));
@@ -572,7 +563,7 @@ int main()
 		model = glm::rotate(model, glm::radians(mainWindow.getPaletaC()), glm::vec3(-1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		//PidoveADA_M.RenderModel();
-		//##################
+		//################# FIN DE PIDOVE JERARQUICO #################
 
 		//############ EXTRAS Y SFX #################
 		model = glm::mat4(1.0);
@@ -629,7 +620,7 @@ int main()
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(28.684f, 54.559, -13.897f));
 		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::translate(model, glm::vec3(mainWindow.getI(),mainWindow.getJ(),mainWindow.getK()));
+		model = glm::translate(model, glm::vec3(mainWindow.getI(), mainWindow.getJ(), mainWindow.getK()));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bola_M.RenderModel();
 
@@ -648,7 +639,7 @@ int main()
 		model = glm::translate(model, glm::vec3(-22.315f, 76.122f, 0.0f));
 		model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(8.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 5.593f, 19.242f)); 
+		model = glm::scale(model, glm::vec3(1.0f, 5.593f, 19.242f));
 		toffset = glm::vec2(toffsetScoreboardU, toffsetScoreboardV);
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(toffset));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -684,10 +675,10 @@ int main()
 			engine->play2D("audio/birdflap.wav", false);
 			mainWindow.setBirdFlap_sfx();
 		}
-		//######################
+		//############ FIN DE EXTRAS Y SFX #################
 
 
-		//Agave ¿qué sucede si lo renderizan antes del coche y el helicóptero?
+		// USO DE TEXTURAS CON TRANSPARENCIA
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(8.62f, 61.782f, -0.248f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -696,7 +687,7 @@ int main()
 		glUniform2fv(uniformTextureOffset, 1, glm::value_ptr(noOffset));
 		glassTexture.UseTexture();
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-		
+
 		//blending: transparencia o traslucidez
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

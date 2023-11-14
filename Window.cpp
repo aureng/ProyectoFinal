@@ -287,12 +287,10 @@ void Window::ManejaMouseButtons(GLFWwindow* window, int button, int action, int 
 {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-	// Maneja el clic del botón izquierdo
 	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
 		if (action == GLFW_PRESS)
 		{
-			// Realiza la acción deseada para el clic izquierdo
 			theWindow->spring1_sfx = true;
 			theWindow->resorte += 1.0f;
 		}
@@ -302,8 +300,6 @@ void Window::ManejaMouseButtons(GLFWwindow* window, int button, int action, int 
 			theWindow->resorte -= 1.0f;
 		}
 	}
-
-	// Puedes agregar más bloques condicionales para otros botones si es necesario
 }
 
 Window::~Window()

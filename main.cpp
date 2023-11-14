@@ -1,7 +1,7 @@
 //para cargar imagen
 #define STB_IMAGE_IMPLEMENTATION
 
-//
+//DECLARACION DE TODOS LOS HEADERS
 #include <stdio.h>
 #include <string.h>
 #include <cmath>
@@ -91,7 +91,6 @@ GLfloat oneST =0.0f, fiveST = 0.0f, tenST = 0.0f;
 float lastFrame = 0.0f;
 static double limitFPS = 1.0 / 60.0;
 
-
 //############ VARIABLES PARA USO DE KEYFRAMES ####################
 typedef struct _frame
 {
@@ -107,18 +106,17 @@ typedef struct _frame
 }FRAME;
 
 bool animacion = false;
-
 float posXavion = 2.0, posYavion = 5.0, posZavion = -3.0;
 float movAvion_x = 0.0f, movAvion_y = 0.0f, movAvion_z = 0.0f;
 float giroAvion = 0;
 #define MAX_FRAMES 100 //100
 int i_max_steps = 90; //90
-int i_curr_steps = 6;
+int i_curr_steps = 6; //Depende del frame actual
 
 FRAME KeyFrame[MAX_FRAMES];
 int FrameIndex = 6;			//introducir datos
 bool play = false;
-int playIndex = 0;
+int playIndex = 0; //Empieza desde 0
 //#####################
 
 
@@ -357,7 +355,6 @@ int main()
 	PidoveAIA_M.LoadModel("Models/Pidove/pidove_ala_izq_abierta.obj");
 	PidoveADA_M = Model();
 	PidoveADA_M.LoadModel("Models/Pidove/pidove_ala_der_abierta.obj");
-
 
 	std::vector<std::string> skyboxFacesDia;
 	skyboxFacesDia.push_back("Textures/Skybox/dia/left.png"); //Left

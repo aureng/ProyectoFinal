@@ -66,6 +66,7 @@ Model Moneda_M;
 Model Bola_M; //Bola de Pinball
 Model PBT_M; //Pokeball Top
 Model PBB_M; //Pokeball Bottom
+Model Tree_M;
 
 //Exports para PIDOVE
 Model PidoveBase_M;
@@ -84,6 +85,13 @@ Material Material_opaco;
 DirectionalLight mainLight;
 PointLight pointLights[MAX_POINT_LIGHTS];
 SpotLight spotLights[MAX_SPOT_LIGHTS];
+
+//VARIABLES DE ANIMACION
+bool f0=false, f1=false, f2 = false, f3 = false, f4 = false, f5 = false, f6 = false, f7 = false, f8 = false, f9 = false;
+float posI_monedaX = 38.0f, posI_monedaY = 42.838f, posI_monedaZ = -2.064f;
+float incX_moneda = 0.0f, incY_moneda = 0.0f, incZ_moneda = 0.0f;
+float posI_bolaX = 28.684f, posI_bolaY = 54.559f, posI_bolaZ = -11.0f;
+float incX_bola = 0.0f, incY_bola = 0.0f, incZ_bola = 0.0f;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -307,6 +315,13 @@ void animate(void)
 }
 */
 ///////////////* FIN KEYFRAMES*////////////////////////////
+void resetValues() {
+	f0 = false, f1 = false, f2 = false, f3 = false, f4 = false, f5 = false, f6 = false, f7 = false, f8 = false, f9 = false;
+	posI_monedaX = 38.0f, posI_monedaY = 42.838f, posI_monedaZ = -2.064f;
+	incX_moneda = 0.0f, incY_moneda = 0.0f, incZ_moneda = 0.0f;
+	posI_bolaX = 28.684f, posI_bolaY = 54.559f, posI_bolaZ = -11.0f;
+	incX_bola = 0.0f, incY_bola = 0.0f, incZ_bola = 0.0f;
+}
 
 int main()
 {
@@ -343,6 +358,8 @@ int main()
 	PBT_M.LoadModel("Models/Pokebola/poke_arriba.obj");
 	PBB_M = Model();
 	PBB_M.LoadModel("Models/Pokebola/poke_abajo.obj");
+	Tree_M = Model();
+	Tree_M.LoadModel("Models/Tree.obj");
 
 	//Modelo de Pidove
 	PidoveBase_M = Model();
@@ -386,10 +403,8 @@ int main()
 	skyboxNoche = Skybox(skyboxFacesNoche);
 	skyboxList.push_back(skyboxNoche);
 
-
 	Material_brillante = Material(4.0f, 256);
 	Material_opaco = Material(0.3f, 4);
-
 
 	mainLight = DirectionalLight(1.0f, 1.0f, 1.0f,
 		0.6f, 0.6f,
@@ -530,6 +545,31 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Pinball_M.RenderModel();
 
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(120.0f, 0.0f, 170.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tree_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-190.0f, 0.0f, 180.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tree_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-250.0f, 0.0f, -140.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tree_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(60.0f, 0.0f, -100.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tree_M.RenderModel();
+
+		model = glm::mat4(1.0);
+		model = glm::translate(model, glm::vec3(-120.0f, 0.0f, -170.0f));
+		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+		Tree_M.RenderModel();
+
 		//############## INICIO DE PIDOVE JERARQUICO #################
 		model = glm::mat4(1.0);
 		model = glm::translate(model, glm::vec3(-24.59f, 117.51f, 2.225f));
@@ -610,14 +650,14 @@ int main()
 		Flipper_M.RenderModel(); //Flipper Derecho Normal Controlado por C
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(38.0f + mainWindow.getI(), 42.838f + mainWindow.getJ(), -2.064f + mainWindow.getK()));
+		model = glm::translate(model, glm::vec3(posI_monedaX + incX_moneda, posI_monedaY + incY_moneda, posI_monedaZ + incZ_moneda));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Moneda_M.RenderModel();
 
 		model = glm::mat4(1.0);
-		model = glm::translate(model, glm::vec3(28.684f, 54.559, -13.897f));
-		model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::translate(model, glm::vec3(mainWindow.getI(), mainWindow.getJ(), mainWindow.getK()));
+		model = glm::translate(model, glm::vec3(posI_bolaX, posI_bolaY, posI_bolaZ));
+		model = glm::rotate(model, glm::radians(-14.5f), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::translate(model, glm::vec3(incX_bola, incY_bola, incZ_bola));
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		Bola_M.RenderModel();
 
@@ -643,6 +683,81 @@ int main()
 		scoreboardTexture.UseTexture();
 		Material_opaco.UseMaterial(uniformSpecularIntensity, uniformShininess);
 		meshList[0]->RenderMesh();
+
+		if (mainWindow.getMoneda_anim() && f9 == false) {
+			incX_moneda = 3.0f;
+			f9 = f0 = true;
+			mainWindow.setMoneda_anim();
+		}
+		if (f0) { //inserta moneda
+			if (incX_moneda > 0.0f) {
+				incX_moneda -= 0.005f;
+			}
+			else {
+				mainWindow.setTCoin_sfx();
+				f0 = false;
+				f1 = true;
+			}
+		}
+		if (f1) { //Coloca bola
+			if (incZ_bola > -2.987f) {
+				incZ_bola -= 0.01f;
+			}
+			else {
+				f1 = false;
+				f2 = true;
+			}
+		}
+		if (f2) { //Golpea bola
+			if (incX_bola > -38.0f) {
+				incX_bola -= 0.1f;
+			}
+			else {
+				f2 = false;
+				f3 = true;
+			}
+		}
+		if (f3) { //rebota arriba y va pal bumper
+			if (incX_bola < -30.0f && incZ_bola < 8.5f) {
+				incX_bola += 0.1f;
+				incZ_bola += 0.1f;
+			}
+			else {
+				mainWindow.setTBumper_sfx();
+				f3 = false;
+				f4 = true;
+			}
+		}
+		if (f4) { //choca en pared
+			if (incX_bola < -25.0f || incZ_bola > 3.5f) {
+				incX_bola += 0.1f;
+				incZ_bola -= 0.1f;
+			}
+			else {
+				f4 = false;
+				f5 = true;
+			}
+		}
+		if (f5) { //desliza abajo
+			if (incX_bola < -3.0f) {
+				incX_bola += 0.1f;
+			}
+			else {
+				f5 = false;
+				f6 = true;
+			}
+		}
+		if (f6) { //cae y pierde
+			if (incX_bola < 5.0f || incZ_bola < 15.5f) {
+				incX_bola += 0.1f;
+				incZ_bola += 0.2f;
+			}
+			else {
+				f9 = f6 = false;
+				resetValues();
+			}
+		}
+
 
 		if (mainWindow.getFlipper_sfx()) {
 			engine->play2D("audio/flipper.wav", false);

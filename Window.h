@@ -42,12 +42,15 @@ public:
 	void setPidove_anim() { pidove_anim = false; }
 
 	void setCoin_sfx() { coin_sfx = false; }
+	void setTCoin_sfx() { coin_sfx = true; }
 	void setPidove_sfx() { pidove_sfx = false; }
 	void setBirdFlap_sfx() { birdflap_sfx = false; }
 	void setFlipper_sfx() { flipper_sfx = false; }
 	void setSpring1_sfx() { spring1_sfx = false; }
 	void setSpring2_sfx() { spring2_sfx = false; }
 	void setBumper_sfx() { bumper_sfx = false; }
+	void setTBumper_sfx() { bumper_sfx = true; }
+
 	~Window();
 private: 
 	GLFWwindow *mainWindow;

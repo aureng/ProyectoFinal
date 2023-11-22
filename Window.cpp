@@ -115,7 +115,7 @@ void Window::ManejaTeclado(GLFWwindow* window, int key, int code, int action, in
 	//Numeros declarados para uso de animaciones?
 	if (key == GLFW_KEY_1 && action == GLFW_PRESS)
 	{
-		//printf("Presione 1\n");
+		theWindow->moneda_anim = true;
 	}
 	if (key == GLFW_KEY_2 && action == GLFW_PRESS)
 	{
